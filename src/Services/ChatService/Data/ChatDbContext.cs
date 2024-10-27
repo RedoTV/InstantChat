@@ -11,5 +11,4 @@ public class ChatDbContext : DbContext
     }
     public DbSet<ChatRoom> ChatRooms { get; set; }
     public DbSet<UserChat> UserChats { get; set; }
-
 }

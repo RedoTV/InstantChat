@@ -1,0 +1,51 @@
+{
+    "GlobalConfiguration": {
+      "BaseUrl": "http://localhost:7000"
+    },
+    "Routes": [
+      {
+        "UpstreamPathTemplate": "/gateway/UserManagement/Register",
+        "UpstreamHttpMethod": ["Post"],
+        "DownstreamPathTemplate": "/UserManagement/Register",
+        "DownstreamScheme": "http",
+        "DownstreamHostAndPorts": [{
+          "Host": "user-management",
+          "Port": 80
+        }]
+      },
+      {
+        "UpstreamPathTemplate": "/gateway/UserManagement/SignIn",
+        "UpstreamHttpMethod": ["Post"],
+        "DownstreamPathTemplate": "/UserManagement/SignIn",
+        "DownstreamScheme": "http",
+        "DownstreamHostAndPorts": [{
+          "Host": "user-management",
+          "Port": 80
+        }]
+      },
+      {
+      "UpstreamPathTemplate": "/gateway/TestManagement/GetTestAuthorized",
+      "UpstreamHttpMethod": ["Get"],
+      "DownstreamPathTemplate": "/TestManagement/GetTestAuthorized",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [{
+        "Host": "test-management",
+        "Port": 80
+      }], 
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+      },
+      {
+        "UpstreamPathTemplate": "/gateway/TestManagement/GetTest",
+        "UpstreamHttpMethod": ["Get"],
+        "DownstreamPathTemplate": "/TestManagement/GetTest",
+        "DownstreamScheme": "http",
+        "DownstreamHostAndPorts": [{
+          "Host": "test-management",
+          "Port": 80
+        }]
+      }
+    ]
+}

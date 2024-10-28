@@ -3,15 +3,72 @@ using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using Google.Apis.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserService.Data;
 using UserService.Models;
+using UserService.Models.Dtos;
 
 namespace UserService.Services;
 
-public class AuthService(IConfiguration _configuration, UsersDbContext _usersDbContext) : IAuthService
+public class AuthService : IAuthService
 {
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
+    private readonly IConfiguration _configuration;
+    private readonly IMapper _mapper;
+
+    public AuthService(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration, IMapper mapper)
+    {
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _configuration = configuration;
+        _mapper = mapper;
+    }
+
+    public async Task<IdentityResult> RegisterUserAsync(RegisterDto userRegisterDto)
+    {
+        var user = _mapper.Map<User>(userRegisterDto);
+        return await _userManager.CreateAsync(user, userRegisterDto.Password);
+    }
+
+    public async Task<string?> SignInUserAsync(LoginDto userLoginDto)
+    {
+        var user = await _userManager.FindByEmailAsync(userLoginDto.Email);
+        if (user == null)
+            return null;
+
+        var result = await _signInManager.PasswordSignInAsync(user, userLoginDto.Password, false, false);
+        if (result.Succeeded)
+            return GenerateJwtToken(user);
+
+        return null;
+    }
+
+    public async Task<string?> GoogleCallbackAsync(ExternalLoginInfo info)
+    {
+        var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
+        if (result.Succeeded)
+        {
+            var user = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email)!);
+            return GenerateJwtToken(user!);
+        }
+
+        var newUser = new User
+        {
+            UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
+            Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+        };
+
+        var createUserResult = await _userManager.CreateAsync(newUser);
+        if (!createUserResult.Succeeded)
+            return null;
+
+        await _userManager.AddLoginAsync(newUser, info);
+        return GenerateJwtToken(newUser);
+    }
+
     public string GenerateJwtToken(User user)
     {
         var claims = new[]
@@ -34,25 +91,4 @@ public class AuthService(IConfiguration _configuration, UsersDbContext _usersDbC
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<string> SignInWithGoogle(string googleToken)
-    {
-        var payload = await GoogleJsonWebSignature.ValidateAsync(googleToken);
-
-        var user = await _usersDbContext.Users
-            .FirstOrDefaultAsync(u => u.Email == payload.Email);
-
-        if (user == null)
-        {
-            user = new User
-            {
-                UserName = payload.Email,
-                Email = payload.Email
-            };
-
-            await _usersDbContext.Users.AddAsync(user);
-            await _usersDbContext.SaveChangesAsync();
-        }
-
-        return GenerateJwtToken(user);
-    }
 }

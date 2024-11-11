@@ -7,7 +7,7 @@ public class ChatDbContext : DbContext
 {
     public ChatDbContext(DbContextOptions options) : base(options)
     {
-
+        Database.EnsureCreated();
     }
     public DbSet<ChatRoom> ChatRooms { get; set; }
     public DbSet<UserChat> UserChats { get; set; }

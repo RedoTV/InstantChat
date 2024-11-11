@@ -4,8 +4,8 @@ namespace ChatService.Services.Interfaces;
 
 public interface IChatRoomService
 {
-    Task CreateChatRoom(string name);
-    Task<ChatRoom> GetChatRoom(int chatRoomId);
-    Task<IEnumerable<ChatRoom>> GetAllChatRooms();
-    Task DeleteChatRoom(int chatRoomId);
+    Task<ChatRoom> CreateChatRoomAsync(string name, CancellationToken cancellationToken);
+    Task<ChatRoom?> GetChatRoomAsync(int chatRoomId, CancellationToken cancellationToken);
+    Task<IEnumerable<ChatRoom>> GetAllChatRoomsAsync(CancellationToken cancellationToken);
+    Task DeleteChatRoomAsync(int chatRoomId, CancellationToken cancellationToken);
 }

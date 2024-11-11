@@ -1,5 +1,6 @@
 using ChatService.Data;
 using ChatService.Graphql;
+using ChatService.Middlewares;
 using ChatService.Services.Implementations;
 using ChatService.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -27,9 +28,13 @@ builder.Services.AddHttpClient<IUserChatService, UserChatService>(client =>
 
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType<Query>();
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .AddSorting();
 
 var app = builder.Build();
+
+app.UseMiddleware<TaskCancellerationHandlingMiddleware>();
 
 // Updating database to the latest migration version
 using (var scope = app.Services.CreateScope())

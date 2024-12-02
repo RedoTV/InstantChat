@@ -1,12 +1,13 @@
 using ChatService.Models;
 using ChatService.Models.Dtos;
+using HotChocolate.Subscriptions;
 
 namespace ChatService.Services.Interfaces;
 
 public interface IUserChatService
 {
-    Task AddUserToChat(int userId, int chatRoomId);
-    Task RemoveUserFromChat(int userId, int chatroomId);
-    Task<User> GetUsersInChatRoom(int chatRoomId);
-    Task<IEnumerable<ChatRoom>> GetUserChats(int userId);
+    Task<UserChat> AddUserToChat(Guid userId, int chatRoomId, CancellationToken cancellationToken);
+    Task RemoveUserFromChat(Guid userId, int chatRoomId, CancellationToken cancellationToken);
+    Task<IEnumerable<Guid>> GetUsersIdInChatRoom(int chatRoomId, CancellationToken cancellationToken);
+    Task<IEnumerable<ChatRoom>> GetUserChats(Guid userId, CancellationToken cancellationToken);
 }

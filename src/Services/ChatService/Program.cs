@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 });
 
 builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
+builder.Services.AddScoped<IUserChatService, UserChatService>();
 
 builder.Services.AddHttpClient<IUserChatService, UserChatService>(client =>
 {
@@ -30,7 +31,9 @@ builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
-    .AddSorting();
+    .AddSubscriptionType<Subscription>()
+    .AddSorting()
+    .AddInMemorySubscriptions();
 
 var app = builder.Build();
 
@@ -43,6 +46,7 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
+app.UseWebSockets();
 app.MapGraphQL("/chat");
 
 app.Run();

@@ -1,40 +1,64 @@
 using ChatService.Models;
 using ChatService.Services.Interfaces;
+using HotChocolate;
+using HotChocolate.Subscriptions;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace ChatService.Graphql;
-
-public class Mutation
+namespace ChatService.Graphql
 {
-    public async Task<ChatRoom> AddChatRoom(
-        [Service] IChatRoomService chatRoomService,
-        string name,
-        CancellationToken cancellationToken
-    )
+    public class Mutation
     {
-        try
+        public async Task<ChatRoom> AddChatRoom(
+            [Service] IChatRoomService chatRoomService,
+            string name,
+            [Service] ITopicEventSender sender,
+            CancellationToken cancellationToken)
         {
-            return await chatRoomService.CreateChatRoomAsync(name, cancellationToken);
+            try
+            {
+                ChatRoom chatRoom = await chatRoomService.CreateChatRoomAsync(name, cancellationToken);
+                await sender.SendAsync(nameof(AddChatRoom), chatRoom, cancellationToken);
+                return chatRoom;
+            }
+            catch
+            {
+                return null!;
+            }
         }
-        catch
-        {
-            return null!;
-        }
-    }
 
-    public async Task<bool> DeleteChatRoom(
-        [Service] IChatRoomService chatRoomService,
-        int chatRoomId,
-        CancellationToken cancellationToken
-    )
-    {
-        try
+        public async Task<bool> DeleteChatRoom(
+            [Service] IChatRoomService chatRoomService,
+            int chatRoomId,
+            CancellationToken cancellationToken)
         {
-            await chatRoomService.DeleteChatRoomAsync(chatRoomId, cancellationToken);
-            return true;
+            try
+            {
+                await chatRoomService.DeleteChatRoomAsync(chatRoomId, cancellationToken);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
-        catch
+
+        public async Task<UserChat> AddUserToChat(
+            [Service] IUserChatService userChatService,
+            Guid userId,
+            int chatRoomId,
+            CancellationToken cancellationToken)
         {
-            return false;
+            try
+            {
+                UserChat userChat = await userChatService.AddUserToChat(userId, chatRoomId, cancellationToken);
+                return userChat;
+            }
+            catch
+            {
+                return null!;
+            }
         }
     }
 }

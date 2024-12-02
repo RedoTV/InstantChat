@@ -27,14 +27,16 @@ public class ChatRoomService : IChatRoomService
         };
         await _dbContext.ChatRooms.AddAsync(chatRoom, cancellationToken);
 
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         chatRoom = await _dbContext.ChatRooms
             .Where(r =>
                 r.Name == chatRoom.Name &&
                 r.CreatedAt == chatRoom.CreatedAt
             )
-            .FirstAsync();
+            .FirstAsync(cancellationToken);
+
+
         return chatRoom;
     }
 

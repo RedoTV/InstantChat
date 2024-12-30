@@ -10,10 +10,12 @@ namespace ChatService.Services.Implementations;
 public class UserChatService : IUserChatService
 {
     public ChatDbContext _dbContext { get; }
+    public HttpClient _httpContext;
 
-    public UserChatService(ChatDbContext dbContext)
+    public UserChatService(ChatDbContext dbContext, HttpClient httpContext)
     {
         _dbContext = dbContext;
+        _httpContext = httpContext;
     }
 
     public async Task<UserChat> AddUserToChat(Guid userId, int chatRoomId, CancellationToken cancellationToken)

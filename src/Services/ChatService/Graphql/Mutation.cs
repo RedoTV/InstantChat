@@ -1,10 +1,7 @@
 using ChatService.Models;
+using ChatService.Models.Dtos;
 using ChatService.Services.Interfaces;
-using HotChocolate;
 using HotChocolate.Subscriptions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ChatService.Graphql
 {
@@ -48,11 +45,18 @@ namespace ChatService.Graphql
             [Service] IUserChatService userChatService,
             Guid userId,
             int chatRoomId,
+            [Service] ITopicEventSender sender,
             CancellationToken cancellationToken)
         {
             try
             {
                 UserChat userChat = await userChatService.AddUserToChat(userId, chatRoomId, cancellationToken);
+
+                // Publish the event to the specific chat room topic
+                var payload = new UserJoinedPayload(chatRoomId, userId);
+                string topic = $"UserJoinedChat_{chatRoomId}";
+                await sender.SendAsync(topic, payload, cancellationToken);
+
                 return userChat;
             }
             catch

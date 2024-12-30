@@ -60,6 +60,7 @@ public class ChatRoomService : IChatRoomService
     public async Task<ChatRoom?> GetChatRoomAsync(int chatRoomId, CancellationToken cancellationToken)
     {
         return await _dbContext.ChatRooms
-            .FindAsync(chatRoomId, cancellationToken);
+            .Include(c => c.UserChats)
+            .FirstOrDefaultAsync(c => c.Id == chatRoomId);
     }
 }

@@ -1,13 +1,17 @@
+using ChatService.Models.Enums;
+
 namespace ChatService.Models.Dtos;
 
-public class UserJoinedPayload
+public class UserActivityPayload
 {
-    public int ChatRoomId { get; set; }
-    public Guid UserId { get; set; }
+    public int ChatRoomId { get; }
+    public Guid UserId { get; }
+    public UserActivityType ActivityType { get; }
 
-    public UserJoinedPayload(int chatRoomId, Guid userId)
+    public UserActivityPayload(int chatRoomId, Guid userId, UserActivityType activityType)
     {
         ChatRoomId = chatRoomId;
         UserId = userId;
+        ActivityType = activityType;
     }
 }

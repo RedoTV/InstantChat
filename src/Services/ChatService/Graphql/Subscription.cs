@@ -1,7 +1,5 @@
 using ChatService.Models;
 using ChatService.Models.Dtos;
-using HotChocolate;
-using HotChocolate.Types;
 
 namespace ChatService.Graphql
 {
@@ -12,8 +10,8 @@ namespace ChatService.Graphql
         public ChatRoom ChatCreated([EventMessage] ChatRoom chatRoom) => chatRoom;
 
         [Subscribe]
-        [Topic("UserJoinedChat_{chatRoomId}")]
-        public UserJoinedPayload UserJoinedToChat(int chatRoomId, [EventMessage] UserJoinedPayload payload)
+        [Topic("ChatActivity_{chatRoomId}")]
+        public UserActivityPayload UserActivityInChat(int chatRoomId, [EventMessage] UserActivityPayload payload)
         {
             if (payload.ChatRoomId == chatRoomId)
             {
@@ -21,6 +19,5 @@ namespace ChatService.Graphql
             }
             return null!;
         }
-
     }
 }

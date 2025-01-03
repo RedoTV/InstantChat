@@ -1,8 +1,6 @@
 using ChatService.Data;
 using ChatService.Models;
-using ChatService.Models.Dtos;
 using ChatService.Services.Interfaces;
-using HotChocolate.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatService.Services.Implementations;
@@ -47,7 +45,7 @@ public class UserChatService : IUserChatService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task RemoveUserFromChat(Guid userId, int chatRoomId, CancellationToken cancellationToken)
+    public async Task<bool> RemoveUserFromChat(Guid userId, int chatRoomId, CancellationToken cancellationToken)
     {
         var userChat = await _dbContext.UserChats
             .FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChatRoomId == chatRoomId, cancellationToken);
@@ -56,6 +54,8 @@ public class UserChatService : IUserChatService
         {
             _dbContext.UserChats.Remove(userChat);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            return true;
         }
+        return false;
     }
 }
